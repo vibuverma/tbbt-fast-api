@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Big Bang Theory API</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Gideon+Roman&display=swap"
+    />
+    <style>
+      body {
+        background-color: #000;
+        color: #fff;
+        font-family: "Gideon Roman", Arial, sans-serif;
+        text-align: center;
+        padding-top: 100px;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        margin: 0;
+      }
+
+      /* Added a div for the background image */
+      .background-image {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url("https://lh3.googleusercontent.com/drive-viewer/AITFw-yaiqXRKdzdK1dkZuYzPmwdBOseLBHIe5hKUZs3suyba9yONm6HySi6o0Sqd6Gxa3ptL_PO7LZt6biSpwAB0lMB98AOxA=s1600");
+        opacity: 0.2; /* Change the opacity level here (0.0 to 1.0) */
+        pointer-events: none;
+      }
+
+      h1 {
+        font-size: 48px;
+      }
+
+      a {
+        color: #fff;
+        text-decoration: none;
+      }
+
+      /* Additional CSS styles for buttons and input fields */
+      button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      input[type="number"] {
+        padding: 5px;
+      }
+
+      /* Style for presenting data */
+      .data-container {
+        text-align: left;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background image div -->
+    <div class="background-image"></div>
+    <h1>The Big Bang Theory API</h1>
+
+    <!-- Get Seasons Section -->
+    <h2>Get Seasons</h2>
+    <button onclick="getSeasons()">Get All Seasons</button>
+    <div id="seasonInfo" class="data-container"></div>
+
+    <!-- Get Season by Number Section -->
+    <h2>Get Season by Number</h2>
+    <input type="number" id="seasonNumber" placeholder="Season Number" />
+    <button onclick="getSeasonByNumber()">Get Season</button>
+    <div id="seasonInfoByNumber" class="data-container"></div>
+
+    <!-- Get Episodes by Season Section -->
+    <h2>Get Episodes by Season</h2>
+    <input type="number" id="seasonNumberEp" placeholder="Season Number" />
+    <button onclick="getEpisodesBySeason()">Get Episodes</button>
+    <div id="episodeList" class="data-container"></div>
+
+    <!-- Get Episode by Number Section -->
+    <h2>Get Episode by Number</h2>
+    <input type="number" id="seasonNumberEpNum" placeholder="Season Number" />
+    <input type="number" id="episodeNumber" placeholder="Episode Number" />
+    <button onclick="getEpisodeByNumber()">Get Episode</button>
+    <div id="episodeInfo" class="data-container"></div>
+
+    <!-- Get Cast Members Section -->
+    <h2>Get Cast Members</h2>
+    <button onclick="getCastMembers()">Get Cast Members</button>
+    <div id="castList" class="data-container"></div>
+
+    <!-- Add a Clear button and a JavaScript function to clear the data -->
+    <button onclick="clearData()">Clear Data</button>
+
+    <script>
+      // JavaScript functions for interacting with the API
+
+      async function fetchData(url) {
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Error:", error);
+          return null;
+        }
+      }
+
+      async function getSeasons() {
+        const seasons = await fetchData("/api/seasons/");
+        if (seasons) {
+          const seasonInfo = document.getElementById("seasonInfo");
+          seasonInfo.innerHTML = formatSeasons(seasons);
+        }
+      }
+
+      async function getSeasonByNumber() {
+        const seasonNumber = document.getElementById("seasonNumber").value;
+        const season = await fetchData(`/api/seasons/${seasonNumber}/`);
+        if (season) {
+          const seasonInfo = document.getElementById("seasonInfoByNumber");
+          seasonInfo.innerHTML = formatSeason(season);
+        }
+      }
+
+      async function getEpisodesBySeason() {
+        const seasonNumber = document.getElementById("seasonNumberEp").value;
+        const episodes = await fetchData(
+          `/api/seasons/${seasonNumber}/episodes/`
+        );
+        if (episodes) {
+          const episodeList = document.getElementById("episodeList");
+          episodeList.innerHTML = formatEpisodes(episodes);
+        }
+      }
+
+      async function getEpisodeByNumber() {
+        const seasonNumber = document.getElementById("seasonNumberEpNum").value;
+        const episodeNumber = document.getElementById("episodeNumber").value;
+        const episode = await fetchData(
+          `/api/seasons/${seasonNumber}/episodes/${episodeNumber}/`
+        );
+        if (episode) {
+          const episodeInfo = document.getElementById("episodeInfo");
+          episodeInfo.innerHTML = formatEpisode(episode);
+        }
+      }
+
+      async function getCastMembers() {
+        const cast = await fetchData("/api/cast/");
+        if (cast) {
+          const castList = document.getElementById("castList");
+          castList.innerHTML = formatCastMembers(cast);
+        }
+      }
+
+      // Function to format data for display
+      function formatSeasons(seasons) {
+        let html = "<h3>Seasons:</h3>";
+        html += "<ul>";
+        seasons.forEach((season) => {
+          html += `<li>Season ${season.season_number} - ${season.episodes.length} episodes</li>`;
+        });
+        html += "</ul>";
+        return html;
+      }
+
+      function formatSeason(season) {
+        return `<h3>Season ${season.season_number}:</h3><p>${season.episodes.length} episodes</p>`;
+      }
+
+      function formatEpisodes(episodes) {
+        let html = "<h3>Episodes:</h3>";
+        html += "<ul>";
+        episodes.forEach((episode) => {
+          html += `<li>Episode ${episode.episode_number}: ${episode.title}</li>`;
+        });
+        html += "</ul>";
+        return html;
+      }
+
+      function formatEpisode(episode) {
+        return `<h3>Episode ${episode.episode_number} - ${episode.title}:</h3><p>${episode.description}</p>`;
+      }
+
+      function formatCastMembers(cast) {
+        let html = "<h3>Cast Members:</h3>";
+        html += "<ul>";
+        cast.forEach((member) => {
+          html += `<li>${member.name} as ${member.role}</li>`;
+        });
+        html += "</ul>";
+        return html;
+      }
+
+      // Function to clear the data displayed on the screen
+      function clearData() {
+        const containers = document.querySelectorAll(".data-container");
+
+        // Reset the content of all data containers
+        containers.forEach((container) => {
+          container.innerHTML = "";
+        });
+      }
+    </script>
+  </body>
+</html>
