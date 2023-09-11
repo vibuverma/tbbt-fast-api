@@ -27,7 +27,7 @@ Before we dive into this marvel of engineering, you'll need a few things.
    ```bash
    cd tbbt-fast-api
    ```
-3. reate a virtual environment (optional, but it's like wearing a protective suit in a lab):
+3. Create a virtual environment (optional, but it's like wearing a protective suit in a lab):
 
    ```bash
    python3 -m venv venv
